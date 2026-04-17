@@ -1,5 +1,5 @@
-APP_NAME = vp
-MAIN_SCRIPT = back.py
+APP_NAME = kursa
+MAIN_SCRIPT = front.py
 BUILD_DIR = build
 DIST_DIR = dist
 INSTALL_PREFIX = /usr/local
