@@ -10,4 +10,4 @@ make install-dependencies
 make build
 make install
 
-Чтобы поиграть: vp
+Чтобы поиграть: kursa
