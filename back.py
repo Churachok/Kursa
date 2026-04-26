@@ -2,39 +2,46 @@ from random import randint
 from random import choice
 
 class GameLogic:
+    def init(self):
+        self.is_win = [1, 2, 3, 4, 5, 6, 7, 8, 0]
+        self.board = []
+        self.empty_index = 8
+
+    def is_win_cp(self):
+        return self.is_win.copy()
+
     def rules(self):
-        self.is_win=[1,2,3,4,5,6,7,8,0]
         self.board = self.is_win_cp()
         self.empty_index = 8
 
     def possible_moves(self):
-        move=[]
-        row,col = divmod(self.empty_index,3)
-        if row>0:
-            move.append(self.empty_index -3)
-        elif row<2:
-            move.append(self.empty_index +3)
-        elif col>0:
-            move.append(self.empty_index -1)
-        elif col<2:
-            move.append(self.empty_index +1)
-        return move
+        moves = []
+        row, col = divmod(self.empty_index, 3)
+        if row > 0:
+            moves.append(self.empty_index - 3)
+        if row < 2:
+            moves.append(self.empty_index + 3)
+        if col > 0:
+            moves.append(self.empty_index - 1)
+        if col < 2:
+            moves.append(self.empty_index + 1)
+        return moves
 
     def swap(self, index):
-        self.board[self.empty_index], self.board = self.board[index], self.board[self.empty_index]
+        self.board[self.empty_index], self.board[index] = self.board[index], self.board[self.empty_index]
         self.empty_index = index
 
     def start_game(self):
         self.board = self.is_win_cp()
         self.empty_index = 8
         for i in range(100):
-            move = self.possible_moves()
-            if move:
-                random_move = choice(move)
+            possible = self.possible_moves()
+            if possible:
+                random_move = choice(possible)
                 self.swap(random_move)
-    
+
     def is_moving(self, value):
-        if value not in range(1,9):
+        if value not in range(1, 9):
             return False
         index = self.board.index(value)
         if index in self.possible_moves():
@@ -44,4 +51,3 @@ class GameLogic:
 
     def win(self):
         return self.board == self.is_win
-        
