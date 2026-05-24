@@ -1,8 +1,8 @@
-from random import randint
 from random import choice
 
+
 class GameLogic:
-    def init(self):
+    def __init__(self):
         self.is_win = [1, 2, 3, 4, 5, 6, 7, 8, 0]
         self.board = []
         self.empty_index = 8
