@@ -7,8 +7,6 @@
 ```bash
 git clone https://github.com/Churachok/Kursa.git
 cd Kursa
-make install-dependencies
-make build
-make install
+make
 
 Чтобы поиграть: kursa
