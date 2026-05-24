@@ -1,46 +1,55 @@
-APP_NAME = kursa
+PYTHON = python3
+VENV = venv
+VENV_PYTHON = $(VENV)/bin/python
+VENV_PIP = $(VENV)/bin/pip
 MAIN_SCRIPT = front.py
-BUILD_DIR = build
-DIST_DIR = dist
-INSTALL_PREFIX = /usr/local
-EXECUTABLE = $(DIST_DIR)/$(APP_NAME)
-VENV_DIR = .venv
+TEST_SCRIPT = test.py
+REQUIREMENTS = requirements.txt
+PROJECT_NAME = kursa
+INSTALL_PATH = /usr/local/bin
 
-PYINSTALLER_CMD = $(VENV_DIR)/bin/pyinstaller
+.PHONY: all install run test clean build venv package install-global uninstall
 
-.PHONY: all build install uninstall clean help
+all: venv install run
 
-all: build
+venv:
+	$(PYTHON) -m venv $(VENV)
 
+install: venv
+	@echo "Установка зависимостей из $(REQUIREMENTS):"
+	$(VENV_PIP) install -r $(REQUIREMENTS)
 
-build: install-dependencies
-	@echo "Сборка приложения с PyInstaller..."
-	@$(PYINSTALLER_CMD) --onefile --name $(APP_NAME) --distpath $(DIST_DIR) --workpath $(BUILD_DIR)/work --specpath $(BUILD_DIR) $(MAIN_SCRIPT)
-	@echo "Исполняемый файл: $(EXECUTABLE)"
+run: install
+	@echo "Запуск игры Пятнашки:"
+	$(VENV_PYTHON) $(MAIN_SCRIPT)
 
+test: install
+	$(VENV_PYTHON) $(TEST_SCRIPT)
 
-install-dependencies:
-	@if [ ! -d "$(VENV_DIR)" ]; then \
-		python -m venv $(VENV_DIR); \
-	fi
-	$(VENV_DIR)/bin/pip install --upgrade pip
-	@if [ -f "requirements.txt" ]; then \
-		echo "Установка зависимостей..."; \
-		$(VENV_DIR)/bin/pip install -r requirements.txt; \
+build: install test
+	@echo "Проект $(PROJECT_NAME) собран"
+
+package: install
+	@echo "Установка pyinstaller"
+	$(VENV_PIP) install pyinstaller
+	$(VENV_PYTHON) -m PyInstaller --onefile --name $(PROJECT_NAME) $(MAIN_SCRIPT)
+
+install-global: package
+	@if [ -f dist/$(PROJECT_NAME) ]; then \
+		sudo cp dist/$(PROJECT_NAME) $(INSTALL_PATH)/; \
+		sudo chmod +x $(INSTALL_PATH)/$(PROJECT_NAME); \
 	else \
-		echo "Файл requirements.txt не найден."; \
+		echo "Исполняемый файл не найден. Сначала выполните 'make package'"; \
+		exit 1; \
 	fi
-	$(VENV_DIR)/bin/pip install pyinstaller
-
-install: build
-	@echo "Установка в $(INSTALL_PREFIX)/bin..."
-	@sudo cp $(EXECUTABLE) $(INSTALL_PREFIX)/bin/
-	@echo "Великие Пятнашки установлены. Запускайте игру командой: $(APP_NAME)"
 
 uninstall:
-	@echo "Удаление из $(INSTALL_PREFIX)/bin..."
-	@sudo rm -f $(INSTALL_PREFIX)/bin/$(APP_NAME)
-	@echo "Великие Пятнашки удалены =("
+	sudo rm -f $(INSTALL_PATH)/$(PROJECT_NAME)
 
 clean:
-	@rm -rf $(BUILD_DIR) $(DIST_DIR) *.spec $(VENV_DIR)
+	rm -rf $(VENV) build dist *.spec
+	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	find . -type f -name "*.pyo" -delete 2>/dev/null || true
+
+reinstall: clean install-global
